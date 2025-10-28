@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slock - Smart Screen Time Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+.slock-logo {
+    width: 60px;
+    height: auto;
+    margin-right: 10px;
+    filter: brightness(0) invert(1); /* Membuat logo jadi putih */
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --primary-light: #8A85FF;
+            --primary-dark: #5752D2;
+            --primary-gradient: linear-gradient(135deg, #6C63FF 0%, #8A85FF 100%);
+            --secondary: #FF6584;
+            --success: #36D1DC;
+            --success-gradient: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);
+            --warning: #FFB347;
+            --danger: #FF5E7D;
+            --danger-gradient: linear-gradient(135deg, #FF5E7D 0%, #FF8E53 100%);
+            --light: #F8F9FF;
+            --dark: #2D2B55;
+            --gray: #8C8CA1;
+            --gray-light: #F5F7FB;
+            --border: #EAECF0;
+            --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-radius: 16px;
+            --border-radius-sm: 12px;
+            --border-radius-lg: 20px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            background: white;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: fadeIn 0.8s ease;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 32px 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-icon {
+            margin-right: 12px;
+            font-size: 34px;
+            animation: pulse 2s infinite;
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .simple-lock {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+
+        .lock-body {
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: white;
+            border-radius: 8px 8px 5px 5px;
+            top: 10px;
+            left: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .lock-arch {
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            border: 3px solid white;
+            border-radius: 12px 12px 0 0;
+            border-bottom: none;
+            top: 0;
+            left: 10px;
+        }
+
+        .lock-hole {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--primary-dark);
+            border-radius: 50%;
+            top: 17px;
+            left: 16px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .tagline {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-bottom: 24px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .time-display {
+            font-size: 46px;
+            font-weight: 800;
+            margin: 20px 0;
+            position: relative;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .time-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .time-label span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .main-content {
+            padding: 28px;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-gradient);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 12px;
+            color: var(--primary);
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            transition: var(--transition);
+            background: var(--gray-light);
+            font-weight: 500;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(108, 99, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-outline:hover {
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(54, 209, 220, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 16px rgba(54, 209, 220, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .time-range {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .time-input {
+            width: 45%;
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            font-size: 16px;
+            background: var(--gray-light);
+            transition: var(--transition);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .time-input:focus {
+            border-color: var(--primary);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .divider {
+            width: 10%;
+            text-align: center;
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .transactions {
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .transactions::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .transactions::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .transactions::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .transaction-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--border-radius-sm);
+            padding-left: 14px;
+            padding-right: 14px;
+            margin: 0 -14px;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-desc {
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .transaction-icon {
+            margin-right: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .positive .transaction-icon {
+            background: rgba(54, 209, 220, 0.1);
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        .negative .transaction-icon {
+            background: rgba(255, 94, 125, 0.1);
+            color: var(--danger);
+        }
+
+        .locked-section {
+            text-align: center;
+            padding: 28px 24px;
+            background: linear-gradient(135deg, var(--gray-light), #f0f2f5);
+            border-radius: var(--border-radius);
+            margin: 24px 0;
+            border: 2px dashed var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .locked-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--danger-gradient);
+        }
+
+        .locked-icon {
+            font-size: 48px;
+            color: var(--danger);
+            margin-bottom: 16px;
+            animation: shake 2s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-5deg); }
+            20%, 40%, 60%, 80% { transform: rotate(5deg); }
+        }
+
+        .locked-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 16px;
+        }
+
+        .token-slider {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #e9ecef, var(--primary));
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .slider:hover {
+            background: linear-gradient(to right, #e9ecef, var(--primary-light));
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            border: 4px solid var(--primary);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-dark);
+        }
+
+        .slider-value {
+            text-align: center;
+            font-weight: 700;
+            margin-top: 16px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 28px;
+            border-radius: var(--border-radius);
+            padding: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            color: var(--gray);
+            z-index: 1;
+            font-size: 15px;
+        }
+
+        .tab.active {
+            color: white;
+        }
+
+        .tab-highlight {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            height: calc(100% - 12px);
+            width: calc(33.333% - 12px);
+            background: var(--primary-gradient);
+            border-radius: var(--border-radius-sm);
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(108, 99, 255, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 22px;
+            font-size: 13px;
+            color: var(--gray);
+            border-top: 1px solid var(--border);
+            background: var(--gray-light);
+            font-weight: 500;
+        }
+
+        .token-balance {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin: 18px 0;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .token-balance::after {
+            content: 'tokens';
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .progress-container {
+            margin: 24px 0;
+        }
+
+        .progress-bar {
+            height: 14px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--success-gradient);
+            border-radius: 10px;
+            width: 65%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 20px 20px;
+            animation: move 1s linear infinite;
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-top: 8px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            padding: 18px 22px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            max-width: 340px;
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1000;
+            border-left: 4px solid var(--primary);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification i {
+            margin-right: 12px;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-group label {
+            font-weight: 500;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        .unlock-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unlock-btn .slider-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--success-gradient);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: var(--border-radius-sm);
+        }
+
+        .unlock-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: var(--gray-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: white;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+        }
+
+        .app-badge {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .usage-chart {
+            height: 120px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .chart-bar {
+            width: 12%;
+            background: var(--primary-gradient);
+            border-radius: 6px 6px 0 0;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-bar::after {
+            content: attr(data-hour);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            padding: 14px;
+            background: var(--gray-light);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .action-btn i {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .action-btn span {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .timer-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .timer-start {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .timer-pause {
+            background: var(--warning);
+            color: white;
+        }
+
+        .timer-reset {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .break-timer {
+            text-align: center;
+            padding: 15px;
+            background: var(--gray-light);
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            border: 2px solid var(--border);
+        }
+
+        .break-timer-display {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .break-active {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .break-active .break-timer-display {
+            color: white;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .profile-info h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 16px;
+            background: var(--gray-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .auth-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .stats-details {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .stats-details::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .stats-details::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .stats-details::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .app-usage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-usage-item:last-child {
+            border-bottom: none;
+        }
+
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin-right: 12px;
+        }
+
+        .app-info {
+            flex: 1;
+        }
+
+        .app-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .app-usage {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .app-time {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .schedule-days {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .logout-btn {
+            background: var(--danger-gradient);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-badge">v2.1.0</div>
+        
+        <div class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </div>
+        
+        <!-- Authentication Screen -->
+        <div id="authScreen">
+            <div class="header">
+                <div class="logo">
+    <img src="https://iili.io/K6sqz9p.png" 
+         alt="SLock Logo" 
+         class="slock-logo">
+    SLock
+</div>
+
+
+                <div class="tagline">Smart Screen Time Management</div>
+                <div class="time-display" id="currentTime">11:00</div>
+                <div class="time-label">
+                    <span>Less Screen, More Life.</span>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="loginTab">Login</div>
+                    <div class="auth-tab" id="signupTab">Sign Up</div>
+                </div>
+
+                <!-- Login Form -->
+                <div class="card" id="loginForm">
+                    <div class="card-title">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Welcome Back
+                    </div>
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email" value="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" value="password">
+                    </div>
+                    <button class="btn btn-primary" id="loginBtn">LOGIN TO SLOCK</button>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">Forgot password?</a>
+                    </div>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div class="card hidden" id="signupForm">
+                    <div class="card-title">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </div>
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" class="form-control" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" class="form-control" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" class="form-control" placeholder="Create a password">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupConfirmPassword">Confirm Password</label>
+                        <input type="password" id="signupConfirmPassword" class="form-control" placeholder="Confirm your password">
+                    </div>
+                    <button class="btn btn-primary" id="signupBtn">CREATE ACCOUNT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Screen (Initially Hidden) -->
+        <div id="appScreen" class="hidden">
+            <div class="header">
+                <div class="logo">
+    <img src="https://iili.io/K6sqz9p.png" 
+         alt="SLock Logo" 
+         class="slock-logo">
+    SLock
+</div>
+
+                <div class="tagline">Smart Screen Time Management</div>
+                <div class="time-display" id="appCurrentTime">11:00</div>
+                <div class="time-label">
+                    <span>H: <span id="appHoursUsed">00:00</span></span>
+                    <span>H - M - S</span>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab-highlight" id="tabHighlight"></div>
+                <div class="tab active" data-tab="dashboard">Dashboard</div>
+                <div class="tab" data-tab="stats">Stats</div>
+                <div class="tab" data-tab="profile">Profile</div>
+            </div>
+
+            <div class="main-content">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-coins"></i>
+                            Token Balance
+                        </div>
+                        <div class="token-balance" id="tokenBalance">10.5</div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress" id="tokenProgress"></div>
+                            </div>
+                            <div class="progress-labels">
+                                <span>0</span>
+                                <span>Daily Limit: 15 tokens</span>
+                                <span>15</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="screenTime">2h 15m</div>
+                            <div class="stat-label">Screen Time Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="appsUsed">8</div>
+                            <div class="stat-label">Apps Used</div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <div class="action-btn" id="addTokensBtn">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add Tokens</span>
+                        </div>
+                        <div class="action-btn" id="viewStatsBtn">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>View Stats</span>
+                        </div>
+                        <div class="action-btn" id="setScheduleBtn">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Set Schedule</span>
+                        </div>
+                        <div class="action-btn" id="breakTimerBtn">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>Break Timer</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-exchange-alt"></i>
+                            Recent Transactions
+                        </div>
+                        <div class="transactions" id="transactionsList">
+                            <!-- Transactions will be added dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="locked-section">
+                        <div class="locked-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="locked-text">SCREEN LOCKED!</div>
+                        <div class="time-display" id="lockTimer">05:00</div>
+                        <div class="time-label">H: 00:00 | H - M - S</div>
+                        <div class="timer-controls">
+                            <button class="timer-btn timer-start" id="startLockTimer">Start</button>
+                            <button class="timer-btn timer-pause" id="pauseLockTimer">Pause</button>
+                            <button class="timer-btn timer-reset" id="resetLockTimer">Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="token-slider">
+                        <div class="card-title">
+                            <i class="fas fa-key"></i>
+                            Use Token to Unlock
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0.5" max="5" value="1" step="0.5" class="slider" id="tokenSlider">
+                            <div class="slider-value" id="sliderValue">1 token</div>
+                        </div>
+                        <button class="btn unlock-btn btn-success" id="unlockBtn">
+                            <span>UNLOCK SCREEN (1 TOKEN)</span>
+                            <div class="slider-track"></div>
+                        </button>
+                    </div>
+
+                    <!-- Break Timer Section -->
+                    <div class="break-timer" id="breakTimer">
+                        <div class="card-title">
+                            <i class="fas fa-coffee"></i>
+                            Break Timer
+                        </div>
+                        <div class="break-timer-display" id="breakTimerDisplay">05:00</div>
+                        <div class="timer-controls">
+                            <button class="timer-btn timer-start" id="startBreakTimer">Start Break</button>
+                            <button class="timer-btn timer-pause" id="pauseBreakTimer">Pause</button>
+                            <button class="timer-btn timer-reset" id="resetBreakTimer">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Tab -->
+                <div class="tab-content" id="stats">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Usage Statistics
+                        </div>
+                        <div class="usage-chart" id="usageChart">
+                            <!-- Chart bars will be generated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-mobile-alt"></i>
+                            App Usage
+                        </div>
+                        <div class="stats-details" id="appUsageList">
+                            <!-- App usage items will be added dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-calendar-week"></i>
+                            Weekly Summary
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">12h 30m</div>
+                                <div class="stat-label">This Week</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">-2h 15m</div>
+                                <div class="stat-label">Vs Last Week</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div class="tab-content" id="profile">
+                    <div class="card">
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="profileAvatar">U</div>
+                            <div class="profile-info">
+                                <h2 id="profileName">User Name</h2>
+                                <p id="profileEmail">user@example.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-sliders-h"></i>
+                            Schedule Settings
+                        </div>
+                        <div class="time-range">
+                            <input type="time" class="time-input" id="startTime" value="10:00">
+                            <div class="divider">-</div>
+                            <input type="time" class="time-input" id="endTime" value="05:00">
+                        </div>
+                        <button class="btn btn-primary" id="saveTimeBtn">SAVE TIME SETTINGS</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-bell"></i>
+                            Notifications
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="notif1" checked>
+                            <label for="notif1">Enable notifications</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="notif2" checked>
+                            <label for="notif2">Low token warning</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="notif3">
+                            <label for="notif3">Daily summary</label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-palette"></i>
+                            Appearance
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="darkMode">
+                            <label for="darkMode">Enable Dark Mode</label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Security
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="security1" checked>
+                            <label for="security1">Require password for changes</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="security2">
+                            <label for="security2">Auto-lock after inactivity</label>
+                        </div>
+                    </div>
+
+                    <button class="btn logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> LOGOUT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Slock &copy; 2025 | Less Screen, More Life.
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div id="notificationText">Settings saved successfully!</div>
+    </div>
+
+    <script>
+        // Data and state management
+        const state = {
+            // User data
+            user: {
+                name: "User Name",
+                email: "user@example.com",
+                isLoggedIn: false
+            },
+            // App data
+            tokens: 10.5,
+            screenTime: 135, // in minutes
+            appsUsed: 8,
+            transactions: [
+                { description: "+0.5 token (AD)", amount: 0.5, type: "positive" },
+                { description: "+0.2 token (Load)", amount: 0.2, type: "positive" },
+                { description: "-1 token (open phone)", amount: -1, type: "negative" },
+                { description: "+1 token (Task completed)", amount: 1, type: "positive" },
+                { description: "-0.5 token (Extended time)", amount: -0.5, type: "negative" }
+            ],
+            isLocked: true,
+            lockTime: 300, // in seconds
+            dailyLimit: 15,
+            isDarkMode: false,
+            usageData: [20, 35, 45, 60, 75, 80, 65, 50, 40, 30, 25, 20], // Sample usage data for chart
+            // App usage data
+            appUsage: [
+                { name: "Social Media", time: "45m", icon: "fa-comments" },
+                { name: "Entertainment", time: "35m", icon: "fa-play-circle" },
+                { name: "Productivity", time: "25m", icon: "fa-briefcase" },
+                { name: "Games", time: "20m", icon: "fa-gamepad" },
+                { name: "Browser", time: "10m", icon: "fa-globe" }
+            ],
+            // Timer states
+            lockTimerInterval: null,
+            lockTimerRunning: false,
+            breakTimerInterval: null,
+            breakTimerRunning: false,
+            breakTime: 300 // 5 minutes in seconds
+        };
+
+        // DOM Elements
+        const authScreen = document.getElementById('authScreen');
+        const appScreen = document.getElementById('appScreen');
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const currentTimeEl = document.getElementById('currentTime');
+        const appCurrentTimeEl = document.getElementById('appCurrentTime');
+        const tokenBalanceEl = document.getElementById('tokenBalance');
+        const tokenProgressEl = document.getElementById('tokenProgress');
+        const transactionsListEl = document.getElementById('transactionsList');
+        const lockTimerEl = document.getElementById('lockTimer');
+        const tokenSliderEl = document.getElementById('tokenSlider');
+        const sliderValueEl = document.getElementById('sliderValue');
+        const unlockBtnEl = document.getElementById('unlockBtn');
+        const saveTimeBtnEl = document.getElementById('saveTimeBtn');
+        const notificationEl = document.getElementById('notification');
+        const notificationTextEl = document.getElementById('notificationText');
+        const screenTimeEl = document.getElementById('screenTime');
+        const appsUsedEl = document.getElementById('appsUsed');
+        const hoursUsedEl = document.getElementById('appHoursUsed');
+        const themeToggleEl = document.getElementById('themeToggle');
+        const tabHighlightEl = document.getElementById('tabHighlight');
+        const usageChartEl = document.getElementById('usageChart');
+        const appUsageListEl = document.getElementById('appUsageList');
+        const profileNameEl = document.getElementById('profileName');
+        const profileEmailEl = document.getElementById('profileEmail');
+        const profileAvatarEl = document.getElementById('profileAvatar');
+        
+        // Timer elements
+        const startLockTimerBtn = document.getElementById('startLockTimer');
+        const pauseLockTimerBtn = document.getElementById('pauseLockTimer');
+        const resetLockTimerBtn = document.getElementById('resetLockTimer');
+        const startBreakTimerBtn = document.getElementById('startBreakTimer');
+        const pauseBreakTimerBtn = document.getElementById('pauseBreakTimer');
+        const resetBreakTimerBtn = document.getElementById('resetBreakTimer');
+        const breakTimerDisplay = document.getElementById('breakTimerDisplay');
+        const breakTimerSection = document.getElementById('breakTimer');
+
+        // Initialize the app
+        function init() {
+            updateTime();
+            setupEventListeners();
+            
+            // Start timers
+            setInterval(updateTime, 1000);
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Auth tab switching
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            });
+
+            signupTab.addEventListener('click', () => {
+                signupTab.classList.add('active');
+                loginTab.classList.remove('active');
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
+
+            // Login functionality
+            loginBtn.addEventListener('click', () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (email && password) {
+                    state.user.email = email;
+                    state.user.name = email.split('@')[0];
+                    state.user.isLoggedIn = true;
+                    
+                    // Switch to app screen
+                    authScreen.classList.add('hidden');
+                    appScreen.classList.remove('hidden');
+                    
+                    // Initialize app data
+                    updateAppData();
+                    
+                    showNotification('Welcome to Slock! Your screen time is now managed.');
+                } else {
+                    showNotification('Please enter both email and password.', 'error');
+                }
+            });
+
+            // Signup functionality
+            signupBtn.addEventListener('click', () => {
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                
+                if (name && email && password && confirmPassword) {
+                    if (password !== confirmPassword) {
+                        showNotification('Passwords do not match!', 'error');
+                        return;
+                    }
+                    
+                    state.user.name = name;
+                    state.user.email = email;
+                    state.user.isLoggedIn = true;
+                    
+                    // Switch to app screen
+                    authScreen.classList.add('hidden');
+                    appScreen.classList.remove('hidden');
+                    
+                    // Initialize app data
+                    updateAppData();
+                    
+                    showNotification('Account created successfully! Welcome to Slock.');
+                } else {
+                    showNotification('Please fill all fields.', 'error');
+                }
+            });
+
+            // Logout functionality
+            logoutBtn.addEventListener('click', () => {
+                state.user.isLoggedIn = false;
+                appScreen.classList.add('hidden');
+                authScreen.classList.remove('hidden');
+                showNotification('You have been logged out.');
+            });
+
+            // App tab functionality
+            document.querySelectorAll('.tab').forEach((tab, index) => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+                    
+                    // Position tab highlight
+                    positionTabHighlight(index);
+                    
+                    // Update data if needed
+                    if (tab.getAttribute('data-tab') === 'stats') {
+                        generateUsageChart();
+                        updateAppUsageList();
+                    }
+                });
+            });
+
+            // Token slider functionality
+            tokenSliderEl.addEventListener('input', () => {
+                const value = tokenSliderEl.value;
+                sliderValueEl.textContent = `${value} token${value != 1 ? 's' : ''}`;
+                unlockBtnEl.querySelector('span').textContent = `UNLOCK SCREEN (${value} TOKEN${value != 1 ? 'S' : ''})`;
+            });
+
+            // Unlock button functionality
+            unlockBtnEl.addEventListener('click', () => {
+                const tokensToUse = parseFloat(tokenSliderEl.value);
+                
+                if (state.tokens >= tokensToUse) {
+                    state.tokens -= tokensToUse;
+                    state.isLocked = false;
+                    state.lockTime = 0;
+                    
+                    // Add transaction
+                    state.transactions.unshift({
+                        description: `-${tokensToUse} token (unlock screen)`,
+                        amount: -tokensToUse,
+                        type: "negative"
+                    });
+                    
+                    updateTokenBalance();
+                    updateTransactions();
+                    updateLockTimerDisplay();
+                    
+                    showNotification(`Screen unlocked using ${tokensToUse} token${tokensToUse !== 1 ? 's' : ''}!`);
+                    
+                    // Reset after 5 seconds
+                    setTimeout(() => {
+                        state.isLocked = true;
+                        state.lockTime = 300;
+                        updateLockTimerDisplay();
+                        showNotification('Screen is now locked again.');
+                    }, 5000);
+                } else {
+                    showNotification('Not enough tokens to unlock!', 'error');
+                }
+            });
+
+            // Save time settings button
+            saveTimeBtnEl.addEventListener('click', () => {
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                
+                showNotification(`Time restrictions set from ${startTime} to ${endTime}`);
+            });
+
+            // Theme toggle
+            themeToggleEl.addEventListener('click', function() {
+                state.isDarkMode = !state.isDarkMode;
+                
+                if (state.isDarkMode) {
+                    document.body.style.background = 'linear-gradient(135deg, #2c3e50, #34495e)';
+                    themeToggleEl.innerHTML = '<i class="fas fa-sun"></i>';
+                    showNotification('Dark mode enabled');
+                } else {
+                    document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    themeToggleEl.innerHTML = '<i class="fas fa-moon"></i>';
+                    showNotification('Dark mode disabled');
+                }
+            });
+
+            // Dark mode toggle in settings
+            document.getElementById('darkMode').addEventListener('change', function() {
+                state.isDarkMode = this.checked;
+                
+                if (state.isDarkMode) {
+                    document.body.style.background = 'linear-gradient(135deg, #2c3e50, #34495e)';
+                    themeToggleEl.innerHTML = '<i class="fas fa-sun"></i>';
+                    showNotification('Dark mode enabled');
+                } else {
+                    document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    themeToggleEl.innerHTML = '<i class="fas fa-moon"></i>';
+                    showNotification('Dark mode disabled');
+                }
+            });
+
+            // Quick action buttons
+            document.getElementById('addTokensBtn').addEventListener('click', function() {
+                state.tokens += 2;
+                state.transactions.unshift({
+                    description: "+2 tokens (Quick add)",
+                    amount: 2,
+                    type: "positive"
+                });
+                updateTokenBalance();
+                updateTransactions();
+                showNotification('2 tokens added to your balance!');
+            });
+
+            document.getElementById('viewStatsBtn').addEventListener('click', function() {
+                // Switch to stats tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                document.querySelector('.tab[data-tab="stats"]').classList.add('active');
+                document.getElementById('stats').classList.add('active');
+                
+                positionTabHighlight(1);
+                generateUsageChart();
+                updateAppUsageList();
+            });
+
+            document.getElementById('setScheduleBtn').addEventListener('click', function() {
+                // Switch to profile tab (where schedule settings are)
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                document.querySelector('.tab[data-tab="profile"]').classList.add('active');
+                document.getElementById('profile').classList.add('active');
+                
+                positionTabHighlight(2);
+            });
+
+            document.getElementById('breakTimerBtn').addEventListener('click', function() {
+                startBreakTimer();
+            });
+
+            // Lock Timer Controls
+            startLockTimerBtn.addEventListener('click', startLockTimer);
+            pauseLockTimerBtn.addEventListener('click', pauseLockTimer);
+            resetLockTimerBtn.addEventListener('click', resetLockTimer);
+
+            // Break Timer Controls
+            startBreakTimerBtn.addEventListener('click', startBreakTimer);
+            pauseBreakTimerBtn.addEventListener('click', pauseBreakTimer);
+            resetBreakTimerBtn.addEventListener('click', resetBreakTimer);
+        }
+
+        // Update all app data
+        function updateAppData() {
+            updateTokenBalance();
+            updateTransactions();
+            updateLockTimerDisplay();
+            updateStats();
+            generateUsageChart();
+            updateAppUsageList();
+            updateProfile();
+            
+            // Position tab highlight
+            positionTabHighlight(0);
+        }
+
+        // Update profile information
+        function updateProfile() {
+            profileNameEl.textContent = state.user.name;
+            profileEmailEl.textContent = state.user.email;
+            profileAvatarEl.textContent = state.user.name.charAt(0).toUpperCase();
+        }
+
+        // Update app usage list
+        function updateAppUsageList() {
+            appUsageListEl.innerHTML = '';
+            
+            state.appUsage.forEach(app => {
+                const appItem = document.createElement('div');
+                appItem.className = 'app-usage-item';
+                
+                appItem.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div class="app-icon">
+                            <i class="fas ${app.icon}"></i>
+                        </div>
+                        <div class="app-info">
+                            <div class="app-name">${app.name}</div>
+                            <div class="app-usage">Usage: ${app.time}</div>
+                        </div>
+                    </div>
+                    <div class="app-time">${app.time}</div>
+                `;
+                
+                appUsageListEl.appendChild(appItem);
+            });
+        }
+
+        // Lock Timer Functions
+        function startLockTimer() {
+            if (!state.lockTimerRunning) {
+                state.lockTimerRunning = true;
+                state.lockTimerInterval = setInterval(() => {
+                    if (state.lockTime > 0) {
+                        state.lockTime--;
+                        updateLockTimerDisplay();
+                    } else {
+                        clearInterval(state.lockTimerInterval);
+                        state.lockTimerRunning = false;
+                        showNotification('Lock timer finished!');
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseLockTimer() {
+            if (state.lockTimerRunning) {
+                clearInterval(state.lockTimerInterval);
+                state.lockTimerRunning = false;
+            }
+        }
+
+        function resetLockTimer() {
+            clearInterval(state.lockTimerInterval);
+            state.lockTimerRunning = false;
+            state.lockTime = 300;
+            updateLockTimerDisplay();
+        }
+
+        // Break Timer Functions
+        function startBreakTimer() {
+            if (!state.breakTimerRunning) {
+                state.breakTimerRunning = true;
+                breakTimerSection.classList.add('break-active');
+                state.breakTimerInterval = setInterval(() => {
+                    if (state.breakTime > 0) {
+                        state.breakTime--;
+                        updateBreakTimerDisplay();
+                    } else {
+                        clearInterval(state.breakTimerInterval);
+                        state.breakTimerRunning = false;
+                        breakTimerSection.classList.remove('break-active');
+                        showNotification('Break time is over! Time to get back to work.');
+                        // Auto-add tokens after successful break
+                        state.tokens += 1;
+                        state.transactions.unshift({
+                            description: "+1 token (Break completed)",
+                            amount: 1,
+                            type: "positive"
+                        });
+                        updateTokenBalance();
+                        updateTransactions();
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseBreakTimer() {
+            if (state.breakTimerRunning) {
+                clearInterval(state.breakTimerInterval);
+                state.breakTimerRunning = false;
+            }
+        }
+
+        function resetBreakTimer() {
+            clearInterval(state.breakTimerInterval);
+            state.breakTimerRunning = false;
+            state.breakTime = 300;
+            breakTimerSection.classList.remove('break-active');
+            updateBreakTimerDisplay();
+        }
+
+        function updateBreakTimerDisplay() {
+            const minutes = Math.floor(state.breakTime / 60);
+            const seconds = state.breakTime % 60;
+            breakTimerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Position tab highlight based on active tab
+        function positionTabHighlight(index) {
+            const tabWidth = 100 / 3;
+            tabHighlightEl.style.transform = `translateX(${index * 100}%)`;
+        }
+
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            currentTimeEl.textContent = `${hours}:${minutes}`;
+            if (appCurrentTimeEl) {
+                appCurrentTimeEl.textContent = `${hours}:${minutes}`;
+            }
+        }
+
+        // Update token balance and progress
+        function updateTokenBalance() {
+            tokenBalanceEl.textContent = state.tokens.toFixed(1);
+            const progressPercent = (state.tokens / state.dailyLimit) * 100;
+            tokenProgressEl.style.width = `${Math.min(progressPercent, 100)}%`;
+        }
+
+        // Update transactions list
+        function updateTransactions() {
+            transactionsListEl.innerHTML = '';
+            
+            state.transactions.forEach(transaction => {
+                const transactionEl = document.createElement('div');
+                transactionEl.className = `transaction-item ${transaction.type}`;
+                
+                transactionEl.innerHTML = `
+                    <div class="transaction-desc">
+                        <div class="transaction-icon">
+                            <i class="fas fa-${transaction.type === 'positive' ? 'plus' : 'minus'}"></i>
+                        </div>
+                        ${transaction.description}
+                    </div>
+                    <div class="transaction-amount ${transaction.type}">
+                        ${transaction.amount > 0 ? '+' : ''}${transaction.amount}
+                    </div>
+                `;
+                
+                transactionsListEl.appendChild(transactionEl);
+            });
+        }
+
+        // Update lock timer display
+        function updateLockTimerDisplay() {
+            const minutes = Math.floor(state.lockTime / 60);
+            const seconds = state.lockTime % 60;
+            lockTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (state.lockTime === 0) {
+                lockTimerEl.style.color = '#36D1DC';
+            } else {
+                lockTimerEl.style.color = '';
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const hours = Math.floor(state.screenTime / 60);
+            const minutes = state.screenTime % 60;
+            screenTimeEl.textContent = `${hours}h ${minutes}m`;
+            appsUsedEl.textContent = state.appsUsed;
+            
+            // Update hours used
+            hoursUsedEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        // Generate usage chart
+        function generateUsageChart() {
+            usageChartEl.innerHTML = '';
+            const hours = ['6AM', '8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM', '2AM', '4AM'];
+            
+            state.usageData.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${value}%`;
+                bar.setAttribute('data-hour', hours[index]);
+                usageChartEl.appendChild(bar);
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notificationTextEl.textContent = message;
+            
+            if (type === 'error') {
+                notificationEl.style.borderLeftColor = 'var(--danger)';
+                notificationEl.querySelector('i').className = 'fas fa-exclamation-circle';
+                notificationEl.querySelector('i').style.color = 'var(--danger)';
+            } else {
+                notificationEl.style.borderLeftColor = 'var(--primary)';
+                notificationEl.querySelector('i').className = 'fas fa-check-circle';
+                notificationEl.querySelector('i').style.color = 'var(--primary)';
+            }
+            
+            notificationEl.classList.add('show');
+            
+            setTimeout(() => {
+                notificationEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
