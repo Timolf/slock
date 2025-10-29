@@ -65,6 +65,12 @@
             overflow: hidden;
             animation: fadeIn 0.8s ease;
             position: relative;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .container.show {
+            opacity: 1;
         }
 
         @keyframes fadeIn {
@@ -1122,9 +1128,99 @@
         .hidden {
             display: none;
         }
+
+        /* === LOADING SCREEN STYLES === */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.6s ease;
+        }
+
+        #loadingScreen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            text-align: center;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        .loading-logo {
+            width: 80px;
+            height: auto;
+            filter: brightness(0) invert(1);
+            animation: logoFadeIn 1.2s ease-out forwards;
+            opacity: 0;
+            transform: scale(0.6);
+        }
+
+        .logo-text {
+            font-size: 36px;
+            font-weight: 800;
+            color: white;
+            margin-top: 16px;
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: textFadeIn 1.2s ease-out 0.3s forwards;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            margin: 24px auto 0;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            animation: spinnerFadeIn 1.2s ease-out 0.6s forwards;
+        }
+
+        @keyframes logoFadeIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes textFadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes spinnerFadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.1); }
+        }
     </style>
 </head>
 <body>
+
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen">
+        <div class="loading-content">
+            <img src="https://iili.io/K6sqz9p.png" alt="SLock Logo" class="loading-logo">
+            <div class="logo-text">SLock</div>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
     <div class="container">
         <div class="app-badge">v2.1.0</div>
         
@@ -1136,13 +1232,9 @@
         <div id="authScreen">
             <div class="header">
                 <div class="logo">
-    <img src="https://iili.io/K6sqz9p.png" 
-         alt="SLock Logo" 
-         class="slock-logo">
-    SLock
-</div>
-
-
+                    <img src="https://iili.io/K6sqz9p.png" alt="SLock Logo" class="slock-logo">
+                    SLock
+                </div>
                 <div class="tagline">Smart Screen Time Management</div>
                 <div class="time-display" id="currentTime">11:00</div>
                 <div class="time-label">
@@ -1207,12 +1299,9 @@
         <div id="appScreen" class="hidden">
             <div class="header">
                 <div class="logo">
-    <img src="https://iili.io/K6sqz9p.png" 
-         alt="SLock Logo" 
-         class="slock-logo">
-    SLock
-</div>
-
+                    <img src="https://iili.io/K6sqz9p.png" alt="SLock Logo" class="slock-logo">
+                    SLock
+                </div>
                 <div class="tagline">Smart Screen Time Management</div>
                 <div class="time-display" id="appCurrentTime">11:00</div>
                 <div class="time-label">
@@ -1549,8 +1638,6 @@
         function init() {
             updateTime();
             setupEventListeners();
-            
-            // Start timers
             setInterval(updateTime, 1000);
         }
 
@@ -1581,11 +1668,9 @@
                     state.user.name = email.split('@')[0];
                     state.user.isLoggedIn = true;
                     
-                    // Switch to app screen
                     authScreen.classList.add('hidden');
                     appScreen.classList.remove('hidden');
                     
-                    // Initialize app data
                     updateAppData();
                     
                     showNotification('Welcome to Slock! Your screen time is now managed.');
@@ -1611,11 +1696,9 @@
                     state.user.email = email;
                     state.user.isLoggedIn = true;
                     
-                    // Switch to app screen
                     authScreen.classList.add('hidden');
                     appScreen.classList.remove('hidden');
                     
-                    // Initialize app data
                     updateAppData();
                     
                     showNotification('Account created successfully! Welcome to Slock.');
@@ -1635,18 +1718,14 @@
             // App tab functionality
             document.querySelectorAll('.tab').forEach((tab, index) => {
                 tab.addEventListener('click', () => {
-                    // Remove active class from all tabs and contents
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                     
-                    // Add active class to clicked tab and corresponding content
                     tab.classList.add('active');
                     document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
                     
-                    // Position tab highlight
                     positionTabHighlight(index);
                     
-                    // Update data if needed
                     if (tab.getAttribute('data-tab') === 'stats') {
                         generateUsageChart();
                         updateAppUsageList();
@@ -1670,7 +1749,6 @@
                     state.isLocked = false;
                     state.lockTime = 0;
                     
-                    // Add transaction
                     state.transactions.unshift({
                         description: `-${tokensToUse} token (unlock screen)`,
                         amount: -tokensToUse,
@@ -1683,7 +1761,6 @@
                     
                     showNotification(`Screen unlocked using ${tokensToUse} token${tokensToUse !== 1 ? 's' : ''}!`);
                     
-                    // Reset after 5 seconds
                     setTimeout(() => {
                         state.isLocked = true;
                         state.lockTime = 300;
@@ -1747,7 +1824,6 @@
             });
 
             document.getElementById('viewStatsBtn').addEventListener('click', function() {
-                // Switch to stats tab
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 
@@ -1760,7 +1836,6 @@
             });
 
             document.getElementById('setScheduleBtn').addEventListener('click', function() {
-                // Switch to profile tab (where schedule settings are)
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 
@@ -1794,8 +1869,6 @@
             generateUsageChart();
             updateAppUsageList();
             updateProfile();
-            
-            // Position tab highlight
             positionTabHighlight(0);
         }
 
@@ -1876,7 +1949,6 @@
                         state.breakTimerRunning = false;
                         breakTimerSection.classList.remove('break-active');
                         showNotification('Break time is over! Time to get back to work.');
-                        // Auto-add tokens after successful break
                         state.tokens += 1;
                         state.transactions.unshift({
                             description: "+1 token (Break completed)",
@@ -1978,8 +2050,6 @@
             const minutes = state.screenTime % 60;
             screenTimeEl.textContent = `${hours}h ${minutes}m`;
             appsUsedEl.textContent = state.appsUsed;
-            
-            // Update hours used
             hoursUsedEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         }
 
@@ -2020,6 +2090,21 @@
 
         // Initialize the app when the DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
+
+        // LOADING SCREEN LOGIC
+        window.addEventListener('load', () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const container = document.querySelector('.container');
+
+            setTimeout(() => {
+                loadingScreen.classList.add('fade-out');
+                container.classList.add('show');
+            }, 2000);
+
+            setTimeout(() => {
+                loadingScreen.remove();
+            }, 2600);
+        });
     </script>
 </body>
 </html>
